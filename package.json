@@ -1,0 +1,12 @@
+{
+    "name": "reliable-socket"
+  , "version": "0.0.1"
+  , "description": "Reliable Socket Wrapper for Engine.io"
+  , "repository" : {
+          "type" : "git"
+        , "url" : "git@github.com:mjgil/reliable-socket.git"
+    }
+  , "dependencies": {
+    }
+  , 
+}
