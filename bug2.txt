@@ -6,7 +6,7 @@ var express = require('express');
 var engineio = require('./node_modules/engine.io1/lib/reliable-engine.io.js');
 
 var client = require('./node_modules/engine.io-client1');
-
+console.log(client);
 var fs = require('fs');
 // Create a new express app
 var app = express();
@@ -38,7 +38,8 @@ app.get('/engine.io-client/engine.io.js', function (req, res) {
 io.on('connection', function (socket) {
     console.log('connection', __filename);
     var stream = fs.createReadStream('bug2.txt');
-    socket.on('close', function (reason, desc) {
+
+    socket.on('close', function () {
         stream.destroy();
     });
 
@@ -46,21 +47,10 @@ io.on('connection', function (socket) {
         console.log(error);
     });
 
-    socket.on('retry', function(err) {
-      console.log('retry');
-    });
-
     stream.on('data', sendData);
-
-    socket.on('data', function(data) {
-        console.log(data);
-    });
 
     function sendData(data) {
         socket.send(data);
-        setTimeout(function() {
-            sendData(data);
-        }, 2500);
         // var newStream = fs.createReadStream('bug_106.txt');
         // newStream.on('data', sendData);
     }

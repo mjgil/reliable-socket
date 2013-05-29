@@ -18,18 +18,17 @@ module.exports = ReliableSocket;
  */
 
 function ReliableSocket(uri, opts) {
+  var self = this;
   if (!(this instanceof ReliableSocket)) return new ReliableSocket(uri, opts);
 
+  this.socket = new Socket(uri, opts);
   opts = opts || {};
 
   if ('object' == typeof uri) {
     opts = uri;
   }
 
-  this.socket = new Socket(uri, opts);
-  this.sessionId = 'asdf';
   this.reconnectTimeout = opts.timeout || 5000;
-
   this.setupSocketListeners();
 }
 
@@ -68,42 +67,69 @@ ReliableSocket.util = require('./util');
 ReliableSocket.prototype.setupSocketListeners = function() {
   var self = this;
 
-  // this.socket.transport
-  //   .on('error', function(err) {
-  //     console.log('triggering ours also');
-  //     self.socket.emit('error', err);
-  //   });
-
-  this.socket.onError = function(err) {
-    console.log('our own version of onError');
-    self.socket.emit('error', err);
-  }
-
   this.socket
     .on('open', function () {
       self.emit('open');
+      if (!self.sid) self.sid = self.socket.id;
+      var data = {};
+      data.sid = self.sid;
+      data.id = self.socket.id;
+      var dataString = 'sessionID';
+      dataString = dataString + JSON.stringify(data);
+      self.socket.send(dataString, function(){});
     })
     .on('close', function (reason, desc) {
-      console.log('closed');
+      self.emit('close', reason, desc);
+      console.log(self.socket.id);
+      setTimeout(function() {
+        console.log(self.socket);
+        self.socket.open();
+      }, 2500);
       self.emit('close', reason, desc);
     })
     .on('error', function (err) {
+      self.emit('error', err);
       // based on the type of error, we should try to reconnect
       // does the following work?
-      console.log('intercepted error ' + err);
       setTimeout(function() {
         console.log('trying to re-open');
         // self.socket.open();
-        self.socket.onOpen();
+        self.socket.open();
+        self.socket.emit('retry');
         self.write('hello, after trying to reopen');
       }, 2500);
     })
     .on('data', function (data) {
+      console.log(self.socket.id);
       self.emit('data', data);
     })
     .on('message', function (msg) {
       self.emit('message', msg)
-    });
+    })
+
+  // this.on('open', function() {
+  //   this.sid = this.socket.id;
+  // })
+  // .on('close', function(reason, desc) {
+
+  // })
+  // .on('error', function(reason, desc) {
+
+  // })
+  // .on('data', function(data) {
+
+  // })
+  // .on('message', function(message) {
+
+  // })
+}
+
+ReliableSocket.prototype.reopenSocket = function() {
+  this.socket.id = this.sid;
+  this.socket.readyState = 'opening';
+  var transport = this.socket.createTransport(this.transport);
+  transport.open();
+  this.setTransport(transport);
 }
 
 /**
@@ -116,7 +142,7 @@ ReliableSocket.prototype.setupSocketListeners = function() {
 
 ReliableSocket.prototype.write =
 ReliableSocket.prototype.send = function (msg, fn) {
-  this.socket.sendPacket('message', msg, fn);
+  this.socket.send(msg, fn);
   return this;
 }
 
