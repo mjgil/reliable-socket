@@ -36,7 +36,8 @@ app.get('/engine.io-client/engine.io.js', function (req, res) {
 // Here we tell it what to do.
 
 io.on('connection', function (socket) {
-    console.log('connection', __filename);
+    console.log('io: ', io);
+    io.addSocket(socket);
     var stream = fs.createReadStream('bug2.txt');
     socket.on('close', function (reason, desc) {
         stream.destroy();

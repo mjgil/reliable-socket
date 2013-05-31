@@ -1,7 +1,3 @@
-/**
- * Module requirements.
- */
-
 var Socket = require('./socket')
   , Emitter = require('./emitter');
 
@@ -29,6 +25,9 @@ function ReliableSocket(uri, opts) {
   }
 
   this.reconnectTimeout = opts.timeout || 5000;
+  this.retryTimeout = 1000;
+  this.seenObj = {};
+  this.lastSeen = 0;
   this.setupSocketListeners();
 }
 
@@ -66,70 +65,87 @@ ReliableSocket.util = require('./util');
 
 ReliableSocket.prototype.setupSocketListeners = function() {
   var self = this;
+  var firstOpen = true;
+  var firstClosed = true;
 
   this.socket
     .on('open', function () {
-      self.emit('open');
-      if (!self.sid) self.sid = self.socket.id;
-      var data = {};
-      data.sid = self.sid;
-      data.id = self.socket.id;
-      var dataString = 'sessionID';
-      dataString = dataString + JSON.stringify(data);
-      self.socket.send(dataString, function(){});
+      if (firstOpen) {
+        self.emit('open');
+        firstOpen = false;
+        self.readyState = 'open';
+      }
+      else {
+        // new underlying socket
+        socket.send('getMissed:' + '&session=' + self.sid + '&last=' + self.lastSeen);
+        self.seenObj = {};
+        self.lastSeen = 0;
+      }
     })
     .on('close', function (reason, desc) {
-      self.emit('close', reason, desc);
-      console.log(self.socket.id);
-      setTimeout(function() {
-        console.log(self.socket);
-        self.socket.open();
-      }, 2500);
-      self.emit('close', reason, desc);
+      setTimeout(tryToReopen, self.retryTimeout);
+      setTimeout(checkStillClosed, self.reconnectTimeout);
     })
     .on('error', function (err) {
       self.emit('error', err);
-      // based on the type of error, we should try to reconnect
-      // does the following work?
-      setTimeout(function() {
-        console.log('trying to re-open');
-        // self.socket.open();
-        self.socket.open();
-        self.socket.emit('retry');
-        self.write('hello, after trying to reopen');
-      }, 2500);
+      setTimeout(tryToReopen, self.retryTimeout);
+      setTimeout(checkStillClosed, self.reconnectTimeout);
     })
     .on('data', function (data) {
-      console.log(self.socket.id);
-      self.emit('data', data);
+      handleData('data', data);
     })
     .on('message', function (msg) {
-      self.emit('message', msg)
+      handleData('msg', msg)
     })
 
-  // this.on('open', function() {
-  //   this.sid = this.socket.id;
-  // })
-  // .on('close', function(reason, desc) {
+  function tryToReopen() {
+    if (self.readyState !== 'closed') {
+      if (self.socket.readyState === 'closed') self.socket.open();
+      setTimeout(tryToReopen, self.retryTimeout);
+    }
+  }
 
-  // })
-  // .on('error', function(reason, desc) {
+  function checkStillClosed() {
+    if (self.socket.readyState === 'closed') {
+      self.readyState = 'closed';
+      if (firstClosed) {
+        self.emit('close');
+        firstClosed = false;
+      }
+    }
+  }
 
-  // })
-  // .on('data', function(data) {
+  function handleData(tag, data) {
+    var array = data.split(':')
+    var key = array.shift();
+    var value = array.join(':');
+    if (key === 'sessionID') {
+      self.sid = value;
+    }
+    else if (key === 'missed') {
+      var array = value.split(',')
+      var key = parseInt(array.shift(), 10);
+      var value = array.join(',');
+      if (tag === 'data') self.emit('data', value);
+      if (tag === 'msg') self.emit('message', value);
+    }
+    else {
+      var array = data.split(',')
+      var key = parseInt(array.shift(), 10);
+      var value = array.join(',');
+      self.lastSeen = key;
 
-  // })
-  // .on('message', function(message) {
 
-  // })
-}
-
-ReliableSocket.prototype.reopenSocket = function() {
-  this.socket.id = this.sid;
-  this.socket.readyState = 'opening';
-  var transport = this.socket.createTransport(this.transport);
-  transport.open();
-  this.setTransport(transport);
+      if (!self.seenObj[key]) {
+        self.seenObj[key] = true;
+        self.socket.send('ack:' + key);
+        // console.log('key: ', key);
+        
+        self.emit('data', value);
+        self.emit('message', value);
+      }
+    }
+  }
 }
 
 /**

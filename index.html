@@ -9,6 +9,7 @@
         //console.log(data);
         console.log('dataREceived');
         console.log(data.length);
+        //console.log(data);
         //console.dir(data);
       }
 
@@ -18,8 +19,6 @@
 
       socket.on('open', function () {
         console.log('opened');
-
-        socket.emit('retry', {test: 1});
       });
 
         socket.on('message', dataReceived);
