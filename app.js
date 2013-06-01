@@ -3,7 +3,9 @@ var express = require('express');
 // Require engine io from the symlinked project
 // This guarantees on the server we will be using our
 // development version.
-var engineio = require('./node_modules/engine.io1/lib/reliable-engine.io.js');
+var reliableServer = require('./reliable-socket-server')();
+console.log(reliableServer);
+var engineio = require('engine.io');
 
 var client = require('./node_modules/engine.io-client1');
 
@@ -37,7 +39,7 @@ app.get('/engine.io-client/engine.io.js', function (req, res) {
 
 io.on('connection', function (socket) {
     console.log('io: ', io);
-    io.addSocket(socket);
+    reliableServer.addSocket(socket);
     var stream = fs.createReadStream('bug2.txt');
     socket.on('close', function (reason, desc) {
         stream.destroy();

@@ -4,15 +4,9 @@
  var qs = require('querystring')
   , parse = require('url').parse
   , readFileSync = require('fs').readFileSync
-  , crypto = require('crypto')
   , base64id = require('base64id')
-  , transports = require('./transports')
-  , EventEmitter = require('events').EventEmitter
-  , Socket = require('./socket')
-  , WebSocketServer = require('ws').Server
-  , debug = require('debug')('engine');
+  , EventEmitter = require('events').EventEmitter;
 
-var Server = require('./server');
 
 /**
  * Exports the constructor.
@@ -20,45 +14,9 @@ var Server = require('./server');
 
 module.exports = ReliableServer;
 
-function ReliableServer(opts) {
-  Server.call(this, opts);
+function ReliableServer() {
   this.sessions = {};
-}
-
-ReliableServer.prototype.__proto__ = Server.prototype;
-
-ReliableServer.prototype.handshake = function(transport, req) {
-  var id = base64id.generateId();
-  var self = this;
-  debug('handshaking client "%s"', id);
-
-  try {
-    var transport = new transports[transport](req);
-  }
-  catch (e) {
-    sendErrorMessage(req.res, Server.errors.BAD_REQUEST);
-    return;
-  }
-  var socket = new Socket(id, this, transport);
-
-  if (false !== this.cookie) {
-    transport.on('headers', function(headers){
-      headers['Set-Cookie'] = self.cookie + '=' + id;
-    });
-  }
-
-  transport.onRequest(req);
-
-  this.clients[id] = socket;
-  this.clientsCount++;
-
-  this.emit('connection', socket);
-  socket.once('close', function(){
-    delete self.clients[id];
-    self.clientsCount--;
-  });
-
-  this.addSocket(socket);
+  if (!(this instanceof ReliableServer)) return new ReliableServer();
 }
 
 ReliableServer.prototype.addSocket = function(socket) {
