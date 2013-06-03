@@ -19,7 +19,8 @@
     "expect.js": "*",
     "istanbul": "*",
     "engine.io": "~0.6.0",
-    "engine.io-client": "~0.6.0"
+    "engine.io-client": "~0.6.0",
+    "sinon": "~1.7.2"
   },
   "component": {
     "scripts": {
