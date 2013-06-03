@@ -1,0 +1,14 @@
+{
+  "name": "reliable-socket",
+  "repo": "mjgil/reliable-socket",
+  "description": "Reliable Socket Implementation for Engine.IO Client",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {},
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}
