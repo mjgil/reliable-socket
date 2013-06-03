@@ -1,4 +1,4 @@
-TESTS = $(shell find test/*.js -depth 1 -type f ! -name 'common.js')
+TESTS = $(shell find test/serverside/*.js -depth 1 -type f ! -name 'common.js')
 REPORTER = dot
 
 build: components lib
