@@ -4,11 +4,15 @@
   "description": "Reliable Socket Implementation for Engine.IO Client",
   "version": "0.0.1",
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "component/emitter": "1.0.0",
+    "component/indexof": "*",
+    "visionmedia/debug": "*"
+  },
   "development": {},
   "license": "MIT",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": [
-    "index.js"
+    "lib/index.js"
   ]
 }
