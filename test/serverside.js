@@ -21,7 +21,7 @@ describe('reliable-socket', function() {
 
     it('should have all of the correct parameters', function() {
       var socketInstance = reliableConstruct(uri);
-      console.log(socketInstance);
+      
     });
 
   });
