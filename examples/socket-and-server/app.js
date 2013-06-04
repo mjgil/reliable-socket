@@ -7,15 +7,16 @@ var express = require('express'),
     io = engineio.attach(server);
 
 
-console.log(reliableServer);
-
 app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-
 app.get('/reliable-socket.js', function (req, res) {
-  res.sendfile(__dirname + '../../reliable-socket.js');
+  res.sendfile(__dirname + '/reliable-socket.js');
+});
+
+app.get('/engine.io-client/engine.io.js', function (req, res) {
+  res.sendfile(__dirname + '/engine.io.js');
 });
 
 
@@ -30,9 +31,6 @@ io.on('connection', function (socket) {
         console.log(error);
     });
 
-    socket.on('retry', function(err) {
-      console.log('retry');
-    });
 
     stream.on('data', sendData);
 
@@ -44,7 +42,7 @@ io.on('connection', function (socket) {
         socket.send(data);
         setTimeout(function() {
             sendData(data);
-        }, 2500);
+        }, 250);
         // var newStream = fs.createReadStream('bug_106.txt');
         // newStream.on('data', sendData);
     }

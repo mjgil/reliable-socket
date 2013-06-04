@@ -1,9 +1,24 @@
 <html>
   <head>
+    <script src="reliable-socket.js"></script>
     <script src="engine.io-client/engine.io.js"></script>
     <script>
 
-      var socket = new eio.Socket('ws://localhost/');
+      var socketConstructor = rsock(eio.Socket);
+      var socket = new socketConstructor('ws://localhost/');
+      
+
+      console.log(socket);
+      //console.log(socket.socket);
+      // if ('WebSocket' in window) {
+
+      //   //var webSock = new WebSocket('ws://localhost:8000');
+      //   console.log(webSock);
+      //   //var socketInstance = socketConstructor('ws://localhost');
+      //   //.log(socketInstance);
+      // }
+
+      // var socket = new rsock('ws://localhost/');
 
       var dataReceived = function(data) {
         //console.log(data);
@@ -21,8 +36,9 @@
         console.log('opened');
       });
 
-        socket.on('message', dataReceived);
-        socket.on('close', socketClosed);
+      socket.on('message', dataReceived);
+      //socket.on('data', dataReceived);
+      socket.on('close', socketClosed);
 
       socket.on('error', function(error) {
           console.log('error');
