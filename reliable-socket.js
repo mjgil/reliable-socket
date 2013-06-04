@@ -552,6 +552,15 @@ module.exports = function(Socket) {
     this.firstOpen = true;
     this.firstClosed = true;
     this.sid = null;
+    this.packets = {
+      open: 0,
+      sid: 1,
+      recon: 2,
+      ack: 3,
+      missed: 4,
+      message: 5
+    };
+    this.timeouts = [];
     this.setupSocketListeners();
   }
 
@@ -576,25 +585,25 @@ module.exports = function(Socket) {
           self.emit('open');
           self.firstOpen = false;
           self.readyState = 'open';
-          self.socket.send('getSID:');
+          self.socket.send(self.packets.open);
         }
         else {
           // new underlying socket
-          self.socket.send('getMissed:' + '&session=' + self.sid + '&last=' + self.lastSeen);
+          self.socket.send(self.packets.recon + '&session=' + self.sid + '&last=' + self.lastSeen);
           self.seenObj = {};
           self.lastSeen = 0;
         }
       })
       .on('close', function (reason, desc) {
         console.log('close');
-        setTimeout(function() {self.tryToReopen();}, self.retryTimeout);
-        setTimeout(function() {self.checkStillClosed();}, self.reconnectTimeout);
+        self.timeouts.push(setTimeout(function() {self.tryToReopen();}, self.retryTimeout));
+        self.timeouts.push(setTimeout(function() {self.checkStillClosed();}, self.reconnectTimeout));
       })
       .on('error', function (err) {
         console.log('error');
         self.emit('error', err);
-        setTimeout(function() {self.tryToReopen();}, self.retryTimeout);
-        setTimeout(function() {self.checkStillClosed();}, self.reconnectTimeout);
+        self.timeouts.push(setTimeout(function() {self.tryToReopen();}, self.retryTimeout));
+        self.timeouts.push(setTimeout(function() {self.checkStillClosed();}, self.reconnectTimeout));
       })
       .on('data', function (data) {
         self.handleData('data', data);
@@ -619,7 +628,7 @@ module.exports = function(Socket) {
       if (this.socket.readyState === 'closed') {
         this.socket = new Socket(this.uri);
         this.setupSocketListeners();
-        setTimeout(function() {self.tryToReopen();}, self.retryTimeout);
+        self.timeouts.push(setTimeout(function() {self.tryToReopen();}, self.retryTimeout));
       }
     }
   }
@@ -642,9 +651,26 @@ module.exports = function(Socket) {
         this.firstClosed = false;
       }
     }
+    this.clearAllTimeouts();
   }
 
 
+  /**
+   * Clears all reconnect timeouts
+   *
+   *
+   *
+   * @api private
+   */
+
+  ReliableSocket.prototype.clearAllTimeouts = function() {
+    var l = this.timeouts.length;
+    for (var x = 0; x < l; x++) {
+      var timeout = this.timeouts[x];
+      clearTimeout(timeout);
+    }
+    this.timeouts = [];
+  }
 
   /**
    * Parses incoming data to the socket
@@ -654,43 +680,47 @@ module.exports = function(Socket) {
    */
 
   ReliableSocket.prototype.handleData = function(eventName, data) {
-    var array = data.split(':')
-    var key = array.shift();
-    var value = array.join(':');
-    if (key === 'sessionID') {
-      if (!this.sid) this.sid = value;
-    }
-    else if (key === 'missed') {
-      var array = value.split(',')
-      var key = parseInt(array.shift(), 10);
-      var value = array.join(',');
+    var type = parseInt(data.charAt(0),10);
+    if (!isNaN(type)) {
 
-      // if (eventName === 'data') console.log('missed: ', key);
-      if (!this.seenObj[key]) {
-        this.seenObj[key] = true;
-        this.socket.send('ack:' + key);
-        // console.log('key: ', key);
-        
-        this.emit('data', value);
-        this.emit('message', value);
+      var data = data.substring(1),
+          isSID = (type === this.packets.sid),
+          isPacket = (type === this.packets.missed || 
+                      type === this.packets.message );
+
+
+      if (isSID) {
+        if (!this.sid) this.sid = data;
       }
+      else if (isPacket) {
+        var pData = parsePacket(data);
+        this.lastSeen = pData.id;
+        if (eventName === 'data') console.log(pData.id);
+
+
+        if (!this.seenObj[pData.id]) {
+          this.seenObj[pData.id] = true;
+          this.socket.send(this.packets.ack + '' + pData.id);
+          
+          this.emit('data', pData.data);
+          this.emit('message', pData.data);
+        }
+      }
+
     }
     else {
-      var array = data.split(',')
-      var key = parseInt(array.shift(), 10);
-      var value = array.join(',');
-      this.lastSeen = key;
-      // if (eventName === 'data') console.log(key);
+      console.log('unknown packet');
+    }
 
+    function parsePacket(packet) {
+      var array = packet.split(','),
+          id = parseInt(array.shift(), 10),
+          data = array.join(',');
 
-      if (!this.seenObj[key]) {
-        this.seenObj[key] = true;
-        this.socket.send('ack:' + key);
-        // console.log('key: ', key);
-        
-        this.emit('data', value);
-        this.emit('message', value);
-      }
+      return {
+        id: id,
+        data: data
+      };
     }
   }
 
