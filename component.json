@@ -7,10 +7,7 @@
   "dependencies": {
     "component/emitter": "*",
     "component/indexof": "*",
-    "visionmedia/debug": "*",
-    "json": "*",
-    "component/json": "*",
-    "component/json-fallback": "*"
+    "visionmedia/debug": "*"
   },
   "development": {},
   "license": "MIT",
