@@ -40,15 +40,17 @@ describe('reliable-socket', function() {
     describe('underlying socket listeners', function() {
       it('should open correctly', function(done) {
         var socketInstance = reliableConstruct(uri);
-        setTimeout(function() {
-          expect(socketInstance.readyState).to.be('open');
-          done();
-        }, 10)
+        socketInstance.socket.on('open', function () {
+          setTimeout(function() {
+            expect(socketInstance.readyState).to.be('open');
+            done();
+          }, 20)
+        });
       });
 
       it('should set session id correctly', function(done) {
         server.on('connection', function(socket) {
-          socket.send('sessionID:123');
+          socket.send('1123');
         });
         var socketInstance = reliableConstruct(uri);
         setTimeout(function() {
