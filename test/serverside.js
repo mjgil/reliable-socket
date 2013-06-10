@@ -35,6 +35,8 @@ describe('reliable-socket', function() {
       expect(socketInstance.tryToReopen).to.be.a('function');
       expect(socketInstance.checkStillClosed).to.be.a('function');
       expect(socketInstance.handleData).to.be.a('function');
+      expect(socketInstance.writeBuffer).to.be.an('array');
+      expect(socketInstance.packetCount).to.be.a('number');
     });
 
     describe('underlying socket listeners', function() {
