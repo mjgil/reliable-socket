@@ -1,6 +1,7 @@
 var rsock = require('../index'),
   expect = require('expect.js'),
-  websocket = require('ws');
+  websocket = require('ws'),
+  parser = require('reliable-socket-protocol');
 
 
 
@@ -52,7 +53,7 @@ describe('reliable-socket', function() {
 
       it('should set session id correctly', function(done) {
         server.on('connection', function(socket) {
-          socket.send('1123');
+          socket.send(parser.packets.sid + '123');
         });
         var socketInstance = reliableConstruct(uri);
         setTimeout(function() {
