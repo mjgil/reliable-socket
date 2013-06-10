@@ -20,6 +20,11 @@ describe('reliable-socket', function() {
         uri = 'ws://localhost:8000',
         server = new websocket.Server({port: 8000});
 
+
+    server.on('connection', function(socket) {
+      socket.send(parser.packets.sid + '123');
+    }); 
+
     it('should have all of the correct parameters', function() {
       var socketInstance = reliableConstruct(uri);
       expect(socketInstance.uri).to.be(uri);
@@ -37,6 +42,7 @@ describe('reliable-socket', function() {
       expect(socketInstance.checkStillClosed).to.be.a('function');
       expect(socketInstance.handleData).to.be.a('function');
       expect(socketInstance.writeBuffer).to.be.an('array');
+      expect(socketInstance.timeouts).to.be.an('array');
       expect(socketInstance.packetCount).to.be.a('number');
     });
 
@@ -52,9 +58,6 @@ describe('reliable-socket', function() {
       });
 
       it('should set session id correctly', function(done) {
-        server.on('connection', function(socket) {
-          socket.send(parser.packets.sid + '123');
-        });
         var socketInstance = reliableConstruct(uri);
         setTimeout(function() {
           expect(socketInstance.sid).to.be('123');
@@ -62,6 +65,22 @@ describe('reliable-socket', function() {
         }, 10)
       });
     });
+
+    // describe('tryToReopen', function () {
+    //   it('should reopen correctly', function (done) {
+
+    //     var socketInstance = reliableConstruct(uri);
+    //     setTimeout(function() {
+    //       console.log(socketInstance.socket.readyState);
+    //       socketInstance.socket.readyState = 'closed';
+    //       socketInstance.tryToReopen();
+    //       setTimeout(function () {
+    //         expect(socketInstance.socket.readyState).to.be('open' || 1);
+    //         done();
+    //       }, 10);
+    //     }, 10);
+    //   });
+    // });
 
 
 
