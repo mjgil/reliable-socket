@@ -1277,6 +1277,8 @@ module.exports = function(Socket) {
     var packet = parser.decodePacket(data);
     var fnName = 'on' + capFirstLetter(packet.type);
 
+    console.log(packet.data);
+
     try {
       this[fnName](eventName, packet.data);
     }

@@ -7,8 +7,7 @@
   "dependencies": {
     "component/emitter": "*",
     "component/indexof": "*",
-    "visionmedia/debug": "*",
-    "mjgil/reliable-socket-protocol": "*"
+    "visionmedia/debug": "*"
   },
   "development": {},
   "license": "MIT",
