@@ -35,7 +35,7 @@ io.on('connection', function (socket) {
     stream.on('data', sendData);
 
     socket.on('data', function(data) {
-        console.log(data);
+        console.log('data: %s', data);
     });
 
     function sendData(data) {

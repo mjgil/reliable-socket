@@ -34,6 +34,7 @@
 
       socket.on('open', function () {
         console.log('opened');
+        sendPacket();
       });
 
       socket.on('message', dataReceived);
@@ -44,6 +45,13 @@
           console.log('error');
           console.log(error);
       });
+
+      function sendPacket () {
+        socket.send('testing');
+        setTimeout(function () {
+          sendPacket();
+        });
+      }
     </script>
   </head>
   <body>

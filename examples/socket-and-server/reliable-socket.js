@@ -1185,7 +1185,7 @@ module.exports = function(Socket) {
           // new underlying socket
           var qstring = '&session=' + self.sid + '&last=' + self.lastSeen;
           self.socket.send(parser.encodePacket({type: 'recon', data: qstring}));
-          self.socket.send(parser.encodePacket({type: 'message', data: this.writeBuffer}));
+          self.socket.send(parser.encodePacket({type: 'message', data: self.writeBuffer}));
           self.seenObj = {};
           self.lastSeen = 0;
         }
@@ -1369,7 +1369,8 @@ module.exports = function(Socket) {
     this.packetCount++;
 
     var packet = [this.packetCount, msg];
-    var packetObj = {type: 'message', data: [msg]};
+    var packetObj = {type: 'message', data: [packet]};
+    this.writeBuffer.push(packet);
 
     this.socket.send(parser.encodePacket(packetObj), fn);
     return this;
