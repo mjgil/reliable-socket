@@ -1185,18 +1185,18 @@ module.exports = function(Socket) {
           // new underlying socket
           var qstring = '&session=' + self.sid + '&last=' + self.lastSeen;
           self.socket.send(parser.encodePacket({type: 'recon', data: qstring}));
-          self.socket.send(parser.encodePacket({type: 'message', data: this.writeBuffer}));
+          self.socket.send(parser.encodePacket({type: 'message', data: self.writeBuffer}));
           self.seenObj = {};
           self.lastSeen = 0;
         }
       })
       .on('close', function (reason, desc) {
-        console.log('close');
+        // console.log('close');
         self.timeouts.push(setTimeout(function() {self.tryToReopen();}, self.retryTimeout));
         self.timeouts.push(setTimeout(function() {self.checkStillClosed();}, self.reconnectTimeout));
       })
       .on('error', function (err) {
-        console.log('error');
+        // console.log('error');
         self.emit('error', err);
         self.timeouts.push(setTimeout(function() {self.tryToReopen();}, self.retryTimeout));
         self.timeouts.push(setTimeout(function() {self.checkStillClosed();}, self.reconnectTimeout));
@@ -1276,6 +1276,7 @@ module.exports = function(Socket) {
   ReliableSocket.prototype.handleData = function(eventName, data) {
     var packet = parser.decodePacket(data);
     var fnName = 'on' + capFirstLetter(packet.type);
+    console.log(packet);
 
     try {
       this[fnName](eventName, packet.data);
@@ -1369,7 +1370,8 @@ module.exports = function(Socket) {
     this.packetCount++;
 
     var packet = [this.packetCount, msg];
-    var packetObj = {type: 'message', data: [msg]};
+    var packetObj = {type: 'message', data: [packet]};
+    this.writeBuffer.push(packet);
 
     this.socket.send(parser.encodePacket(packetObj), fn);
     return this;
