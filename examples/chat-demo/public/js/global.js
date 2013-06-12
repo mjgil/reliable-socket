@@ -3,7 +3,7 @@
     socketConstructor = rsock(eio.Socket),
     socket = new socketConstructor('ws://localhost/'),
     randomName = Faker.Name.findName(),
-    timeInterval = 200;
+    timeInterval = 500;
 
   //console.log(socket);
   //console.log(socket.socket);
