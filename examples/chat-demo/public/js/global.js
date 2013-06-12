@@ -1,7 +1,8 @@
 (function($) {
   var time = 0,
     socketConstructor = rsock(eio.Socket),
-    socket = new socketConstructor('ws://localhost/'),
+    //socket = new socketConstructor('ws://localhost/'),
+    socket = new socketConstructor('ws://reliable-socket-demo.mjgil.com'),
     randomName = Faker.Name.findName(),
     timeInterval = 500;
 
