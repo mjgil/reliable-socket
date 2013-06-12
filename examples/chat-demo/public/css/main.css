@@ -61,13 +61,49 @@
   font-weight: normal;
   font-style: normal;
 }
+html,
 body {
   background-color: #fafafa;
+  color: #333;
 }
 #bodyContainer {
   padding: 15px;
   width: 800px;
   margin: 0 auto;
+  background-color: #eee;
+}
+#decriptionArea {
+  width: 100%;
+}
+#buttonArea {
+  width: 250px;
+  float: left;
+}
+#disconnectButton {
+  width: 200px;
+  margin: 0 auto;
+  height: 45px;
+  margin-top: 115px;
+  margin-left: 75px;
+  border-radius: 5px;
+  border: none;
+  background-color: steelBlue;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Raleway Bold';
+  font-size: 16px;
+}
+#disconnectButton:hover {
+  background-color: #315b7e;
+}
+#textArea {
+  padding: 25px 25px 25px 280px;
+  width: 450px;
+  background-color: #ccc;
+  margin: 15px auto 25px;
+  font-family: 'Raleway';
+  line-height: 1.4em;
+  letter-spacing: 1px;
 }
 h1.title {
   padding: 20px;
@@ -78,18 +114,15 @@ h1.title {
   text-align: center;
   background-color: #aaa;
 }
-ul {
-  background-color: #eee;
-}
 li.message {
-  padding: 15px;
-  padding-bottom: 0;
+  padding: 7.5px 15px;
   font-family: 'Raleway';
   text-align: center;
 }
 span.bold {
   font-family: 'Raleway Bold';
 }
-.error {
-  color: #f00;
+.missed {
+  color: #fff;
+  background-color: #333;
 }

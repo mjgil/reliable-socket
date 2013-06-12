@@ -3,7 +3,7 @@
     socketConstructor = rsock(eio.Socket),
     socket = new socketConstructor('ws://localhost/'),
     randomName = Faker.Name.findName(),
-    timeInterval = 100;
+    timeInterval = 200;
 
   //console.log(socket);
   //console.log(socket.socket);
@@ -23,9 +23,10 @@
         userRegex = new RegExp(randomName),
         isUser = userRegex.test(data),
         pastTime = (intTime !== (time - timeInterval)),
-        className = (isUser && pastTime) ? 'message error' : 'message';
+        className = (isUser && pastTime) ? 'message missed' : 'message';
 
     if (intTime === 0) className = 'message'; // hack for first time
+    if (isUser) data = data + ' <- You';
     $('ul#commentList').append('<li class="' + className + '">' + data + '</li>');
   }
 
@@ -44,6 +45,10 @@
   socket.on('error', function(error) {
       console.log('error');
       console.log(error);
+  });
+
+  $('#disconnectButton').click(function() {
+    socket.socket.close();
   });
 
   function sendPacket () {
