@@ -126,3 +126,6 @@ span.bold {
   color: #fff;
   background-color: #333;
 }
+p {
+  margin-top: 20px !important;
+}
