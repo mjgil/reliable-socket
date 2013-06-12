@@ -18,7 +18,7 @@
   // var socket = new rsock('ws://localhost/');
 
   var dataReceived = function(data) {
-    var dataTime = $(data).text(),
+    var dataTime = />(\d+):/.exec(data)[1],
         intTime = parseInt(dataTime, 10),
         userRegex = new RegExp(randomName),
         isUser = userRegex.test(data),
