@@ -359,6 +359,18 @@ Emitter.prototype.hasListeners = function(event){
 };
 
 });
+require.register("component-indexof/index.js", function(exports, require, module){
+
+var indexOf = [].indexOf;
+
+module.exports = function(arr, obj){
+  if (indexOf) return arr.indexOf(obj);
+  for (var i = 0; i < arr.length; ++i) {
+    if (arr[i] === obj) return i;
+  }
+  return -1;
+};
+});
 require.register("LearnBoost-engine.io-protocol/lib/index.js", function(exports, require, module){
 /**
  * Module dependencies.
@@ -719,6 +731,7 @@ var util = require('./util')
   , transports = require('./transports')
   , Emitter = require('./emitter')
   , debug = require('debug')('engine-client:socket')
+  , index = require('indexof')
   , parser = require('engine.io-parser');
 
 /**
@@ -751,6 +764,7 @@ function noop () {};
 
 function Socket(uri, opts){
   if (!(this instanceof Socket)) return new Socket(uri, opts);
+
   opts = opts || {};
 
   if ('object' == typeof uri) {
@@ -1056,7 +1070,7 @@ Socket.prototype.onPacket = function (packet) {
         break;
 
       case 'pong':
-        this.ping();
+        this.setPing();
         break;
 
       case 'error':
@@ -1095,7 +1109,7 @@ Socket.prototype.onHandshake = function (data) {
   this.pingInterval = data.pingInterval;
   this.pingTimeout = data.pingTimeout;
   this.onOpen();
-  this.ping();
+  this.setPing();
 
   // Prolong liveness of socket on heartbeat
   this.removeListener('heartbeat', this.onHeartbeat);
@@ -1124,14 +1138,24 @@ Socket.prototype.onHeartbeat = function (timeout) {
  * @api private
  */
 
-Socket.prototype.ping = function () {
+Socket.prototype.setPing = function () {
   var self = this;
   clearTimeout(self.pingIntervalTimer);
   self.pingIntervalTimer = setTimeout(function () {
     debug('writing ping packet - expecting pong within %sms', self.pingTimeout);
-    self.sendPacket('ping');
+    self.ping();
     self.onHeartbeat(self.pingTimeout);
   }, self.pingInterval);
+};
+
+/**
+* Sends a ping packet 
+*
+* @api public
+*/
+
+Socket.prototype.ping = function () {
+  this.sendPacket('ping');
 };
 
 /**
@@ -1266,8 +1290,11 @@ Socket.prototype.onClose = function (reason, desc) {
       self.writeBuffer = [];
       self.callbackBuffer = [];
     }, 0);
+    var prev = this.readyState;
     this.readyState = 'closed';
-    this.emit('close', reason, desc);
+    if (prev == 'open') {
+      this.emit('close', reason, desc);
+    }
     this.onclose && this.onclose.call(this);
     this.id = null;
   }
@@ -1284,7 +1311,7 @@ Socket.prototype.onClose = function (reason, desc) {
 Socket.prototype.filterUpgrades = function (upgrades) {
   var filteredUpgrades = [];
   for (var i = 0, j = upgrades.length; i<j; i++) {
-    if (~this.transports.indexOf(upgrades[i])) filteredUpgrades.push(upgrades[i]);
+    if (~index(this.transports, upgrades[i])) filteredUpgrades.push(upgrades[i]);
   }
   return filteredUpgrades;
 };
@@ -3041,6 +3068,9 @@ function load (arr, fn) {
 });
 require.alias("component-emitter/index.js", "engine.io/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
+
+require.alias("component-indexof/index.js", "engine.io/deps/indexof/index.js");
+require.alias("component-indexof/index.js", "indexof/index.js");
 
 require.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io/deps/engine.io-parser/lib/index.js");
 require.alias("LearnBoost-engine.io-protocol/lib/keys.js", "engine.io/deps/engine.io-parser/lib/keys.js");
