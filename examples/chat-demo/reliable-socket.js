@@ -1345,6 +1345,9 @@ module.exports = function(Socket) {
       this.lastSeen = id;
 
       if (!this.seenObj[id]) {
+        console.log(packet);
+        console.log(this.seenObj);
+        console.log(this.seenObj[id]);
         this.seenObj[id] = true;
         this.socket.send(parser.encodePacket({type: 'ack', data: id}));
         
@@ -1370,6 +1373,7 @@ module.exports = function(Socket) {
     var packetObj = {type: 'message', data: [packet]};
     this.writeBuffer.push(packet);
 
+    console.log('write packet: ', packet);
     this.socket.send(parser.encodePacket(packetObj), fn);
     return this;
   }
