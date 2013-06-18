@@ -96,17 +96,27 @@ h1#header {
   *width: 99.94791666666667%;
   *margin: 0 0%;
   height: 15%;
+  text-transform: uppercase;
+  padding: 15px;
+  font-family: 'Raleway Bold';
+  text-align: center;
 }
 #sidepane {
   width: 25%;
 }
 #middleArea {
   position: absolute;
+  font-family: 'Raleway', Tahoma, Geneva, Verdana, sans-serif;
   top: 15%;
   bottom: 150px;
   left: 25%;
   right: 0;
   background-color: #f00;
+  padding: 15px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  *behavior: url("/css/boxsizing.htc");
 }
 #inputSection {
   position: absolute;
@@ -118,8 +128,18 @@ h1#header {
 }
 .indicator {
   height: 15%;
-  width: 200px;
-  display: *display: inline;;
+  width: 25%;
+  float: left;
+  background-color: #aaa;
+  margin-right: 15px;
+  padding: 5px;
+  text-align: center;
+}
+.indicatorTitle {
+  text-transform: uppercase;
+}
+.indicatorContent {
+  margin-top: 5px;
 }
 .indicatorNumber,
 .indicatorLabel {
