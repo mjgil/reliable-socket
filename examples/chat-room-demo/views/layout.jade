@@ -1,0 +1,32 @@
+doctype 5
+html(lang="en")
+  head
+    meta(charset='utf-8')
+    title Reliable Socket Demo 
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/reset.css')
+    block styles
+
+  body
+    h1.title reliable socket chat room demo
+    #sidepane
+    #middleArea
+      #indicatorSection
+        .indicator
+          .indicatorTitle Try to Reconnect Every
+          .indicatorContent
+            span.indicatorNumber(contenteditable=true) 1
+            span.indicatorLabel s
+        .indicator
+          .indicatorTitle Close Socket After
+          .indicatorContent
+            span.indicatorNumber(contenteditable=true) 5
+            span.indicatorLabel s
+    #inputSection
+    block body
+
+    script(src='/js/jquery-1.10.1.js')
+    script(src='/reliable-socket.js')
+    script(src='/engine.io-client/engine.io.js')
+    script(src='/js/global.js')
+    block scripts
